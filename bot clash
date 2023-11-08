@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Ensure the script is run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
+
+# Update the package lists
+apt update
+
+# Install necessary packages
+apt -y install vnc4server lxde-core nano
+
+# Add a new user
+adduser
+
+# Set VNC password
+vncpasswd
+
+# Install the VNC server
+vncserver -geometry 1366x768
+
+# Kill the current VNC server if running
+vncserver -kill :1
+
+# Backup the current xstartup file
+mv ~/.vnc/xstartup ~/.vnc/xstartup.bak
+
+# Create a new xstartup file
+echo -e '#!/bin/bash\nxrdb $HOME/.Xresources\nstartlxde &' > ~/.vnc/xstartup
+
+# Set permissions for the new xstartup file
+chmod +x ~/.vnc/xstartup
+
+# Start the VNC server
+vncserver
